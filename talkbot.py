@@ -29,7 +29,7 @@ def gen_trump_talk() -> str:
     trump_text_model = markovify.Text(trump_text)
     return trump_text_model.make_short_sentence(max_chars=500)
 
-if __name__ == '__main__':
+def main():
     reddit = Reddit(
         username=REDDIT_USERNAME,
         password=REDDIT_PASSWORD,
@@ -37,7 +37,7 @@ if __name__ == '__main__':
         client_secret=REDDIT_SECRET,
         user_agent=USER_AGENT
     )
-    print('listening for comments')
+    print('listening for !trumptalk and !nietzschetalk comments')
     db = DB()
     for comment in reddit.subreddit('all').stream.comments():
         if '!nietzschetalk' in comment.body and db.comment_is_new(comment):
@@ -49,3 +49,6 @@ if __name__ == '__main__':
             db.ack_comment(comment)
             print('commented on ' + comment.id)
     db.close()
+
+if __name__ == '__main__':
+    main()

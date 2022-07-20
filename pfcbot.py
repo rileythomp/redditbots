@@ -4,12 +4,13 @@ from threading import Thread
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioRestException
 from db import DB
+from time import time
 
 REDDIT_USERNAME = 'jrtbot'
 REDDIT_PASSWORD = getenv('REDDIT_PASSWORD')   
 REDDIT_ID = getenv('REDDIT_ID')
 REDDIT_SECRET = getenv('REDDIT_SECRET')
-USER_AGENT = 'softengbot by u/jrtbot'
+USER_AGENT = 'pfc swe bot by u/jrtbot'
 TWILIO_ACCOUNT_SID = getenv('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = getenv('TWILIO_AUTH_TOKEN')
 TWILIO_NUMBER = getenv('TWILIO_NUMBER')
@@ -24,9 +25,9 @@ def sendSMS(user_number: str, content: str):
             from_= TWILIO_NUMBER,
             to = f'+1{user_number}'
         )
-        print('sent sms message')
+        print(f'pfcbot sent sms message to {user_number} at {int(time())}')
     except TwilioRestException as e:
-        print(f'Error occurred sending message: {e}')
+        print(f'Error occurred sending message to {user_number} at {int(time())}:\n{e}')
 
 def process_post(post):
     if 'software engineer' in post.title.lower() and db.se_post_is_new(post):
@@ -49,16 +50,16 @@ def process_comment(comment):
         db.ack_se_comment(comment)
 
 def check_posts(subreddit):
-    print(f'listening for posts in {subreddit}')
+    print(f'listening for software engineer posts in {subreddit}')
     for post in subreddit.stream.submissions():
         process_post(post)
 
 def check_comments(subreddit):
-    print(f'listening for comments in {subreddit}')
+    print(f'listening for software engineer comments in {subreddit}')
     for comment in subreddit.stream.comments():
         process_comment(comment)
 
-if __name__ == "__main__":
+def main():
     reddit = Reddit(
         username=REDDIT_USERNAME,
         password=REDDIT_PASSWORD,
@@ -70,3 +71,6 @@ if __name__ == "__main__":
     for subreddit in subreddits:
         Thread(target=check_posts, args=(reddit.subreddit(subreddit),)).start()
         Thread(target=check_comments, args=(reddit.subreddit(subreddit),)).start()
+
+if __name__ == "__main__":
+    main()

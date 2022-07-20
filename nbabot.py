@@ -6,7 +6,7 @@ REDDIT_USERNAME = 'jrtbot'
 REDDIT_PASSWORD = getenv('REDDIT_PASSWORD')   
 REDDIT_ID = getenv('REDDIT_ID')
 REDDIT_SECRET = getenv('REDDIT_SECRET')
-USER_AGENT = 'talkingbot by u/jrtbot'
+USER_AGENT = 'r/nba player sentiment bot by u/jrtbot'
 
 KevinDurantMatches = ['kd ', ' kd', 'kevin durant', 'durant']
 
@@ -18,7 +18,7 @@ if __name__ == '__main__':
         client_secret=REDDIT_SECRET,
         user_agent=USER_AGENT
     )
-    print('listening for comments')
+    print('listening for comments in r/nba')
     db = DB()
     for comment in reddit.subreddit('nba').stream.comments():
         if any(x in comment.body.lower() for x in KevinDurantMatches):
