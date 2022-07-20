@@ -43,11 +43,11 @@ def main():
         if '!nietzschetalk' in comment.body and db.comment_is_new(comment):
             comment.reply(body=gen_nietzsche_talk())
             db.ack_comment(comment)
-            print('commented on ' + comment.id)
+            print(f'made nietzschetalk comment on {comment.submission.url}{comment.id}')
         elif '!trumptalk' in comment.body  and db.comment_is_new(comment):
             comment.reply(body=gen_trump_talk())
             db.ack_comment(comment)
-            print('commented on ' + comment.id)
+            print(f'made trumptalk comment on {comment.submission.url}{comment.id}')
     db.close()
 
 if __name__ == '__main__':
