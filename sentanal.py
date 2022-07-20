@@ -5,11 +5,11 @@
 # vs = analyzer.polarity_scores(sentence)
 # print(str(vs))
 
-import aspect_based_sentiment_analysis as absa
+# import aspect_based_sentiment_analysis as absa
 
-nlp = absa.load()
-text = ("We are great fans of Slack, but we wish the subscriptions were more accessible to small startups.")
+# nlp = absa.load()
+# text = ("We are great fans of Slack, but we wish the subscriptions were more accessible to small startups.")
 
-slack, price = nlp(text, aspects=['slack', 'price'])
-print(price.sentiment)
-print(slack.sentiment)
+# slack, price = nlp(text, aspects=['slack', 'price'])
+# print(price.sentiment)
+# print(slack.sentiment)
