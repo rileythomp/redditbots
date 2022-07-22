@@ -1,7 +1,6 @@
 from praw import Reddit
 from os import getenv
-from db import DB
-from collections import defaultdict
+from db import NbaDB
 from players import player_names
 
 REDDIT_USERNAME = 'jrtbot'
@@ -19,17 +18,16 @@ if __name__ == '__main__':
         user_agent=USER_AGENT
     )
     print('listening for comments in r/nba')
-    # db = DB()
-    playerMentions = defaultdict(int)
+    db = NbaDB()
     for comment in reddit.subreddit('nba').stream.comments():
         for player, names in player_names.items():
             for name in names:
                 if name in comment.body.lower():
-                    playerMentions[player] += 1
                     print('====================================================')
+                    db.add_mention(player, comment.id, comment.body, name)
                     print(comment.body)
-                    print(f'Mentioned: {name} ({player})')
-                    print(playerMentions)
+                    print(f'Mentioned:      {name}    {player}      {comment.id}')
                     print('====================================================')
                     break
-    # db.close()
+    db.close()
+    print('done reading comments from r/nba')
