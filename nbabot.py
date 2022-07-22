@@ -1,14 +1,14 @@
 from praw import Reddit
 from os import getenv
 from db import DB
+from collections import defaultdict
+from players import player_names
 
 REDDIT_USERNAME = 'jrtbot'
 REDDIT_PASSWORD = getenv('REDDIT_PASSWORD')   
 REDDIT_ID = getenv('REDDIT_ID')
 REDDIT_SECRET = getenv('REDDIT_SECRET')
 USER_AGENT = 'r/nba player sentiment bot by u/jrtbot'
-
-KevinDurantMatches = ['kd ', ' kd', 'kevin durant', 'durant']
 
 if __name__ == '__main__':
     reddit = Reddit(
@@ -19,11 +19,17 @@ if __name__ == '__main__':
         user_agent=USER_AGENT
     )
     print('listening for comments in r/nba')
-    db = DB()
+    # db = DB()
+    playerMentions = defaultdict(int)
     for comment in reddit.subreddit('nba').stream.comments():
-        if any(x in comment.body.lower() for x in KevinDurantMatches):
-            print('============================================================')
-            print(comment.body)
-            print(comment.created_utc)
-            print('============================================================')
-    db.close()
+        for player, names in player_names.items():
+            for name in names:
+                if name in comment.body.lower():
+                    playerMentions[player] += 1
+                    print('====================================================')
+                    print(comment.body)
+                    print(f'Mentioned: {name} ({player})')
+                    print(playerMentions)
+                    print('====================================================')
+                    break
+    # db.close()

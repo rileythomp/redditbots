@@ -13,6 +13,15 @@ A collection of reddit bots.
 * nbabot
   * Look into aspect-based sentiment analysis to determine player sentiment in `r/nba`.
 
+    ```
+    from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+    vs = analyzer.polarity_scores(comment.body)
+    print(str(vs))
+    ```
+    is not accurate enough.
+
+  * Do something based on number of mentions
+  
 ### Stack
 * Hosted on **Heroku**.
 * Uses **Twilio** for sending texts
