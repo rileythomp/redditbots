@@ -584,7 +584,7 @@ player_names = {
     "trendon watford": ["trendon watford", "watford"],
     "paul watson": ["paul watson", "watson"],
     "quinndary weatherspoon": ["quinndary weatherspoon", "weatherspoon"],
-    "russell westbrook": ["russell westbrook", "westbrook", " russ "],
+    "russell westbrook": ["russell westbrook", "westbrook", " russ ", "westbrick"],
     "coby white": ["coby white"],
     "derrick white": ["derrick white"],
     "hassan whiteside": ["hassan whiteside", "whiteside"],
