@@ -14,6 +14,10 @@ class NbaDB:
         self.cur.close()
         self.conn.close()
 
+    def get_mentions(self):
+        self.cur.execute('SELECT name, COUNT(*) AS mentions FROM player_mentions GROUP BY name ORDER BY mentions DESC')
+        return [{'player': row[0], 'mentions': row[1]} for row in self.cur]
+
     def add_mention(self, name: str, comment_id: str, comment: str, mention: str):
         try:
             self.cur.execute(
