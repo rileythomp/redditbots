@@ -289,7 +289,7 @@ player_names = {
     "keon johnson": ["keon johnson"],
     "stanley johnson": ["stanley johnson"],
     "tyler johnson": ["tyler johnson"],
-    "nikola jokic": ["nikola jokic", "jokic"],
+    "nikola jokic": ["nikola jokic", "jokic", "joker"],
     "carlik jones": ["carlik jones"],
     "damian jones": ["damian jones"],
     "derrick jones jr.": ["derrick jones jr", "derrick jones"],
