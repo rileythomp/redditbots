@@ -20,7 +20,7 @@ class NbaDB:
 
     def get_mentions(self, limit: int):
         self.cur.execute(
-            'SELECT m.name, COUNT(*) AS mentions, p.img_url FROM player_mentions AS m LEFT JOIN players AS p ON p.name = m.name GROUP BY m.name, p.img_url ORDER BY m.mentions DESC LIMIT %s;',
+            'SELECT m.name, COUNT(*) AS mentions, p.img_url FROM player_mentions AS m LEFT JOIN players AS p ON p.name = m.name GROUP BY m.name, p.img_url ORDER BY mentions DESC LIMIT %s;',
             [limit]
         )
         return [{
