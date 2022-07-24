@@ -25,5 +25,5 @@ A collection of reddit bots.
   
 ### Stack
 * Hosted on **Heroku**.
-* Uses *PostgreSQL** for storing `r/nba` comments
+* Uses **PostgreSQL** for storing `r/nba` comments
 * Uses **Twilio** for sending texts
