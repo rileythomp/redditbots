@@ -1,7 +1,7 @@
 from praw import Reddit
 from os import getenv
 from db import NbaDB
-from players import player_names
+from nbalists import player_names, team_names
 
 REDDIT_USERNAME = 'jrtbot'
 REDDIT_PASSWORD = getenv('REDDIT_PASSWORD')   
@@ -23,11 +23,12 @@ if __name__ == '__main__':
         for player, names in player_names.items():
             for name in names:
                 if name in comment.body.lower():
-                    print('====================================================')
-                    db.add_mention(player, comment.id, comment.body, name)
-                    print(comment.body)
-                    print(f'Mentioned:      {name}    {player}      {comment.id}')
-                    print('====================================================')
+                    db.add_mention(player, comment.id, comment.body, name, 'player')
+                    break
+        for team, names in team_names.items():
+            for name in names:
+                if name in comment.body.lower():
+                    db.add_mention(team, comment.id, comment.body, name, 'team')
                     break
     db.close()
     print('done reading comments from r/nba')

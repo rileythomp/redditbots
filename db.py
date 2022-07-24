@@ -14,34 +14,35 @@ class NbaDB:
         self.cur.close()
         self.conn.close()
 
-    def add_player(self, name: str, img_url: str):
-        self.cur.execute('INSERT INTO players (name, img_url) VALUES (%s, %s);', [name, img_url])
+    def add_image(self, name: str, img_url: str):
+        self.cur.execute('INSERT INTO images (name, img_url) VALUES (%s, %s);', [name, img_url])
         self.conn.commit()
 
-    def get_mentions(self, limit: int, time_dur: int):
+    def get_mentions(self, limit: int, time_dur: int, mention_type: str):
         self.cur.execute(
             '''
             SELECT m.name, COUNT(*) AS mentions, p.img_url
-            FROM player_mentions AS m
-            LEFT JOIN players AS p
+            FROM mentions AS m
+            LEFT JOIN images AS p
             ON p.name = m.name
             WHERE (m.timestamp > (EXTRACT(epoch FROM NOW()) - %s))
+            AND m.mention_type = %s
             GROUP BY m.name, p.img_url
             ORDER BY mentions DESC LIMIT %s;
             ''',
-            [time_dur, limit]
+            [time_dur, mention_type, limit]
         )
         return [{
-            'player': row[0].title(),
+            'name': row[0].title(),
             'mentions': row[1],
             'img_url': row[2]
         } for row in self.cur]
 
-    def add_mention(self, name: str, comment_id: str, comment: str, mention: str):
+    def add_mention(self, name: str, comment_id: str, comment: str, mention: str, mention_type: str):
         try:
             self.cur.execute(
-                'INSERT INTO player_mentions (name, comment_id, comment, mention, timestamp) VALUES (%s, %s, %s, %s, %s);',
-                [name, comment_id, comment, mention, int(time())]
+                'INSERT INTO mentions (name, comment_id, comment, mention, timestamp, mention_type) VALUES (%s, %s, %s, %s, %s, %s);',
+                [name, comment_id, comment, mention, int(time()), mention_type]
             )
         except UniqueViolation as e:
             print(f'unique violation: {e}')

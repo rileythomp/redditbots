@@ -1,3 +1,36 @@
+team_names = {
+    'atlanta hawks': ['atlanta', 'hawks', " atl "],
+    'boston celtics': ['boston', 'celtics', ' bos ', ' celts '],
+    'brooklyn nets': ['brooklyn', 'nets', ' bkn '],
+    'charlotte hornets': ['charlotte', 'hornets', ' cha '],
+    'chicago bulls': ['chicago', 'bulls', ' chi '],
+    'cleveland cavaliers': ['cleveland', 'cavaliers', ' cle ', ' cavs '],
+    'dallas mavericks': ['dallas', 'mavericks', ' dal ', ' mavs '],
+    'denver nuggets': ['denver', 'nuggets', ' den ', ' nugs ', ' nuggs '],
+    'detroit pistons': ['detroit', 'pistons', ' det '],
+    'golden state warriors': ['golden state', 'warriors', ' gsw '],
+    'houston rockets': ['houston', 'rockets', ' hou '],
+    'indiana pacers': ['indiana', 'pacers', ' ind '],
+    'los angeles clippers': ['los angeles', 'clippers', ' lac ', ' clips '],
+    'los angeles lakers': ['los angeles', 'lakers', ' lal '],
+    'memphis grizzlies': ['memphis', 'grizzlies', ' mem ', ' grizz '],
+    'miami heat': ['miami', 'heat', ' mia '],
+    'milwaukee bucks': ['milwaukee', 'bucks', ' mil '],
+    'minnesota timberwolves': ['minnesota', 'timberwolves', 'twolves', 'wolves', ' minn '],
+    'new orleans pelicans': ['new orleans', 'pelicans', ' nop ', ' pels' ],
+    'new york knicks': ['new york', 'knicks', ' nyk '],
+    'oklahoma city thunder': ['oklahoma city', 'thunder', ' okc '],
+    'orlando magic': ['orlando', 'magic', ' orl '],
+    'philadelphia 76ers': ['philadelphia', '76ers', ' phi '],
+    'phoenix suns': ['phoenix', 'suns', ' phx '],
+    'portland trailblazers': ['portland', 'trail blazers', ' por ', 'blazers'],
+    'sacramento kings': ['sacramento', 'kings', ' sac '],
+    'san antonio spurs': ['san antonio', 'spurs', ' sas '],
+    'toronto raptors': ['toronto', 'raptors', ' tor ', ' raps '],
+    'utah jazz': ['utah', 'jazz', ' uta '],
+    'washington wizards': ['washington', 'wizards', ' wiz ']
+}
+
 player_names = {
     "precious achiuwa": ["precious achiuwa", "achiuwa", "precious"],
     "steven adams": ["steven adams", "adams"],
@@ -643,7 +676,7 @@ if __name__ == '__main__':
                 player_imgs = player_info.find_all('img')
                 player_img = player_imgs[0]['src'] if len(player_imgs) > 0 else ''
                 print(player_name)
-                db.add_player(player_name, player_img)
+                db.add_image(player_name, player_img)
                 adds += 1
                 print(f'Added {adds} of {len(player_names)} players')
             elif player_name in player_names:
