@@ -9,7 +9,7 @@ CORS(app)
 
 @app.route('/', methods=['GET'])
 def home():
-    return 'r/nba Player Mentions API'
+    return 'r/NBA Mentions API'
 
 @app.route('/api/v1/mentions', methods=['GET'])
 def get_mentions():
