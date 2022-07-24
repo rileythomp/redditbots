@@ -9,7 +9,7 @@ REDDIT_ID = getenv('REDDIT_ID')
 REDDIT_SECRET = getenv('REDDIT_SECRET')
 USER_AGENT = 'r/nba player sentiment bot by u/jrtbot'
 
-if __name__ == '__main__':
+def main():
     reddit = Reddit(
         username=REDDIT_USERNAME,
         password=REDDIT_PASSWORD,
@@ -32,3 +32,6 @@ if __name__ == '__main__':
                     break
     db.close()
     print('done reading comments from r/nba')
+
+if __name__ == '__main__':
+    main()
