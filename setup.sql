@@ -18,3 +18,8 @@ CREATE TABLE IF NOT EXISTS player_mentions (
 	timestamp INTEGER,
 	PRIMARY KEY(name, comment_id)
 );
+
+CREATE TABLE IF NOT EXISTS players (
+	name VARCHAR PRIMARY KEY,
+	img_url VARCHAR
+);

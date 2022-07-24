@@ -617,3 +617,36 @@ player_names = {
     "cody zeller": ["cody zeller", "zeller"],
     "ivica zubac": ["ivica zubac", "zubac"]
 }
+
+if __name__ == '__main__':
+    from db import NbaDB
+    import requests
+    from bs4 import BeautifulSoup
+    import unidecode
+    BBALL_REF_URL = 'https://www.basketball-reference.com'
+    adds = 0
+    db = NbaDB()
+    alphabet = 'abcdefghijklmnopqrstuvwxyz'
+    for letter in alphabet:
+        page = requests.get(f'{BBALL_REF_URL}/players/{letter}/')
+        soup = BeautifulSoup(page.content, 'html.parser')
+        results = soup.find(id='players')
+        players = results.find_all('tr')
+        for player in players[1:]:
+            player_name = unidecode.unidecode(player.find(attrs={'data-stat':'player'}).text.lower())
+            year_max = player.find(attrs={'data-stat':'year_max'}).text
+            if player_name in player_names and (2020 <= int(year_max) and int(year_max) <= 2022):
+                player_url = player.find(attrs={'data-stat':'player'}).find('a')['href']
+                player_page = requests.get(f'{BBALL_REF_URL}{player_url}')
+                player_soup = BeautifulSoup(player_page.content, 'html.parser')
+                player_info = player_soup.find(id='info')
+                player_imgs = player_info.find_all('img')
+                player_img = player_imgs[0]['src'] if len(player_imgs) > 0 else ''
+                print(player_name)
+                db.add_player(player_name, player_img)
+                adds += 1
+                print(f'Added {adds} of {len(player_names)} players')
+            elif player_name in player_names:
+                print(f'{player_name} is skipped')
+    print(f'Done: Added {adds} of {len(player_names)} players')
+    

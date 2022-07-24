@@ -12,7 +12,8 @@ def home():
 
 @app.route('/api/v1/trending', methods=['GET'])
 def get_mentions():
+    limit = request.args.get('limit', 25)
     db = NbaDB()
-    mentions = db.get_mentions(10)
+    mentions = db.get_mentions(limit)
     db.close()
     return make_response(jp.encode(mentions), 200)

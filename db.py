@@ -14,9 +14,20 @@ class NbaDB:
         self.cur.close()
         self.conn.close()
 
+    def add_player(self, name: str, img_url: str):
+        self.cur.execute('INSERT INTO players (name, img_url) VALUES (%s, %s);', [name, img_url])
+        self.conn.commit()
+
     def get_mentions(self, limit: int):
-        self.cur.execute('SELECT name, COUNT(*) AS mentions FROM player_mentions GROUP BY name ORDER BY mentions DESC LIMIT %s;', [limit])
-        return [{'player': row[0].title(), 'mentions': row[1]} for row in self.cur]
+        self.cur.execute(
+            'SELECT m.name, COUNT(*) AS mentions, p.img_url FROM player_mentions AS m LEFT JOIN players AS p ON p.name = m.name GROUP BY m.name, p.img_url ORDER BY m.mentions DESC LIMIT %s;',
+            [limit]
+        )
+        return [{
+            'player': row[0].title(),
+            'mentions': row[1],
+            'img_url': row[2]
+        } for row in self.cur]
 
     def add_mention(self, name: str, comment_id: str, comment: str, mention: str):
         try:
