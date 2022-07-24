@@ -18,10 +18,18 @@ class NbaDB:
         self.cur.execute('INSERT INTO players (name, img_url) VALUES (%s, %s);', [name, img_url])
         self.conn.commit()
 
-    def get_mentions(self, limit: int):
+    def get_mentions(self, limit: int, time_dur: int):
         self.cur.execute(
-            'SELECT m.name, COUNT(*) AS mentions, p.img_url FROM player_mentions AS m LEFT JOIN players AS p ON p.name = m.name GROUP BY m.name, p.img_url ORDER BY mentions DESC LIMIT %s;',
-            [limit]
+            '''
+            SELECT m.name, COUNT(*) AS mentions, p.img_url
+            FROM player_mentions AS m
+            LEFT JOIN players AS p
+            ON p.name = m.name
+            WHERE (m.timestamp > (EXTRACT(epoch FROM NOW()) - %s))
+            GROUP BY m.name, p.img_url
+            ORDER BY mentions DESC LIMIT %s;
+            ''',
+            [time_dur, limit]
         )
         return [{
             'player': row[0].title(),
