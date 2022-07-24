@@ -13,6 +13,6 @@ def home():
 @app.route('/api/v1/trending', methods=['GET'])
 def get_mentions():
     db = NbaDB()
-    mentions = db.get_mentions()
+    mentions = db.get_mentions(10)
     db.close()
     return make_response(jp.encode(mentions), 200)
