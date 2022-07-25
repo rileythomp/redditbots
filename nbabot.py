@@ -8,6 +8,7 @@ REDDIT_PASSWORD = getenv('REDDIT_PASSWORD')
 REDDIT_ID = getenv('REDDIT_ID')
 REDDIT_SECRET = getenv('REDDIT_SECRET')
 USER_AGENT = 'r/nba player sentiment bot by u/jrtbot'
+REDDIT_URL = 'https://old.reddit.com'
 
 def main():
     reddit = Reddit(
@@ -19,19 +20,27 @@ def main():
     )
     print('listening for comments in r/nba')
     db = NbaDB()
-    for comment in reddit.subreddit('nba').stream.comments():
-        if comment.author and comment.author.name == 'AutoModerator':
+    for c in reddit.subreddit('nba').stream.comments():
+        if c.author and c.author.name == 'AutoModerator':
             continue
+        mentioned = False
         for player, names in player_names.items():
             for name in names:
-                if name in comment.body.lower():
-                    db.add_mention(player, comment.id, comment.body, name, 'player')
+                if name in c.body.lower():
+                    if not mentioned:
+                        db.add_comment(c.id, c.body, c.author.name, f'{REDDIT_URL}{c.permalink}', c.created_utc)
+                    db.add_mention(player, c.id, c.body, name, 'player')
+                    mentioned = True
                     break
         for team, names in team_names.items():
             for name in names:
-                if name in comment.body.lower():
-                    db.add_mention(team, comment.id, comment.body, name, 'team')
+                if name in c.body.lower():
+                    if not mentioned:
+                        db.add_comment(c.id, c.body, c.author.name, f'{REDDIT_URL}{c.permalink}', c.created_utc)
+                    db.add_mention(team, c.id, c.body, name, 'team')
+                    mentioned = True
                     break
+        
     db.close()
     print('done reading comments from r/nba')
 

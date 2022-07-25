@@ -107,7 +107,7 @@ player_names = {
     "charlie brown jr.": ["charlie brown jr", "charlie brown"],
     "chaundee brown jr.": ["chaundee brown jr", "chaundee brown"],
     "greg brown iii": ["greg brown iii", "greg brown"],
-    "jaylen brown": ["jaylen brown"],
+    "jaylen brown": ["jaylen brown", "jaylen", " jb "],
     "moses brown": ["moses brown"],
     "sterling brown": ["sterling brown"],
     "troy brown jr.": ["troy brown jr", "troy brown"],

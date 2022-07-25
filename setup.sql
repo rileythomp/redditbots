@@ -13,14 +13,22 @@ CREATE TABLE IF NOT EXISTS se_posts (
 CREATE TABLE IF NOT EXISTS mentions (
 	name VARCHAR,
 	comment_id VARCHAR,
-	comment VARCHAR,
 	mention VARCHAR,
-	timestamp INTEGER,
 	mention_type VARCHAR,
-	PRIMARY KEY(name, comment_id)
+	PRIMARY KEY(name, comment_id),
+	FOREIGN KEY (name) REFERENCES images(name) ON DELETE CASCADE,
+	FOREIGN KEY (comment_id) REFERENCES nba_comments(comment_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS images (
 	name VARCHAR PRIMARY KEY,
 	img_url VARCHAR
+);
+
+CREATE TABLE IF NOT EXISTS nba_comments (
+	comment_id VARCHAR PRIMARY KEY,
+	comment VARCHAR,
+	author VARCHAR,
+	link VARCHAR,
+	timestamp INTEGER
 );

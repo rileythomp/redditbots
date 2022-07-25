@@ -9,13 +9,6 @@ from time import time
 app = Flask(__name__)
 CORS(app)
 
-REDDIT_USERNAME = 'jrtbot'
-REDDIT_PASSWORD = getenv('REDDIT_PASSWORD')   
-REDDIT_ID = getenv('REDDIT_ID')
-REDDIT_SECRET = getenv('REDDIT_SECRET')
-USER_AGENT = 'r/nba player sentiment bot by u/jrtbot'
-REDDIT_URL = 'https://old.reddit.com'
-
 # TODO: Validate HTTP Referer header on API endpoints
 # print(request.headers.get("Referer"))
 
@@ -42,18 +35,6 @@ def get_comments():
     time_dur = get_time_duration(duration)
     db = NbaDB()
     comments = db.get_comments(page, time_dur, name)
-    reddit = Reddit(
-        username=REDDIT_USERNAME,
-        password=REDDIT_PASSWORD,
-        client_id=REDDIT_ID,
-        client_secret=REDDIT_SECRET,
-        user_agent=USER_AGENT
-    )
-    for i, comment in enumerate(comments):
-        redditComment = reddit.comment(id=comment['comment_id'])
-        comments[i]['comment_link'] = f'{REDDIT_URL}{redditComment.permalink}'
-        comments[i]['score'] = redditComment.score
-        comments[i]['author'] = redditComment.author.name if redditComment.author else '[deleted]'
     db.close()
     return make_response(jp.encode(comments), 200)
 

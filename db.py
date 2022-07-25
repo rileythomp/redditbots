@@ -14,41 +14,65 @@ class NbaDB:
         self.cur.close()
         self.conn.close()
 
-    def add_image(self, name: str, img_url: str):
-        self.cur.execute('INSERT INTO images (name, img_url) VALUES (%s, %s);', [name, img_url])
-        self.conn.commit()
-
     def get_image(self, name: str) -> str:
         self.cur.execute('SELECT img_url FROM images WHERE name = %s;', [name])
         return self.cur.fetchone()[0]
 
+    def add_image(self, name: str, img_url: str):
+        self.cur.execute('INSERT INTO images (name, img_url) VALUES (%s, %s);', [name, img_url])
+        self.conn.commit()
+
     def get_comments(self, page: int, time_dur: int, name: str):
         self.cur.execute(
             '''
-            SELECT comment, timestamp, mention_type, comment_id FROM mentions
-            WHERE name = %s AND (timestamp > (EXTRACT(epoch FROM NOW()) - %s))
-            ORDER BY timestamp DESC
+            SELECT nc.comment, nc.author, nc.link, nc.timestamp, m.mention_type
+            FROM nba_comments AS nc
+            LEFT JOIN mentions AS m
+            ON nc.comment_id = m.comment_id
+            WHERE (nc.timestamp > (EXTRACT(epoch FROM NOW()) - %s))
+            AND m.name = %s
+            ORDER BY nc.timestamp DESC
             LIMIT 10 OFFSET %s;
             ''',
-            [name, time_dur, max(0, page-1)*10]
+            [time_dur, name, max(0, page-1)*10]
         )
         return [{
             'comment': row[0],
-            'timestamp': int(row[1]),
-            'mention_type': row[2],
-            'comment_id': row[3]
+            'author': row[1],
+            'link': row[2],
+            'timestamp': row[3],
+            'mention_type': row[4]
         } for row in self.cur]
+
+    def add_comment(self, comment_id: str, comment: str, author: str, link: str, timestamp: int):
+        try:
+            self.cur.execute(
+                'INSERT INTO nba_comments (comment_id, comment, author, link, timestamp) VALUES (%s, %s, %s, %s, %s);',
+                [comment_id, comment, author, link, timestamp]
+            )
+        except UniqueViolation as e:
+            print(f'unique violation: {e}')
+            pass
+        except InFailedSqlTransaction as e:
+            print(f'in failed sql transaction: {e}')
+            pass
+        except Exception as e:
+            print(f'exception: {e}')
+            pass
+        self.conn.commit()
 
     def get_mentions(self, limit: int, time_dur: int, mention_type: str):
         self.cur.execute(
             '''
-            SELECT m.name, COUNT(*) AS mentions, p.img_url
+            SELECT m.name, COUNT(*) AS mentions, imgs.img_url
             FROM mentions AS m
-            LEFT JOIN images AS p
-            ON p.name = m.name
-            WHERE (m.timestamp > (EXTRACT(epoch FROM NOW()) - %s))
+            LEFT JOIN images AS imgs
+            ON m.name = imgs.name
+            LEFT JOIN nba_comments AS nc
+            ON nc.comment_id = m.comment_id
+            WHERE (nc.timestamp > (EXTRACT(epoch FROM NOW()) - %s))
             AND m.mention_type = %s
-            GROUP BY m.name, p.img_url
+            GROUP BY m.name, imgs.img_url
             ORDER BY mentions DESC LIMIT %s;
             ''',
             [time_dur, mention_type, limit]
@@ -63,8 +87,8 @@ class NbaDB:
     def add_mention(self, name: str, comment_id: str, comment: str, mention: str, mention_type: str):
         try:
             self.cur.execute(
-                'INSERT INTO mentions (name, comment_id, comment, mention, timestamp, mention_type) VALUES (%s, %s, %s, %s, %s, %s);',
-                [name, comment_id, comment, mention, int(time()), mention_type]
+                'INSERT INTO mentions (name, comment_id, mention, mention_type) VALUES (%s, %s, %s, %s);',
+                [name, comment_id, mention, mention_type]
             )
         except UniqueViolation as e:
             print(f'unique violation: {e}')
