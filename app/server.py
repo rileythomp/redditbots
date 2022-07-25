@@ -17,12 +17,14 @@ def home():
     return 'r/NBA Mentions API'
 
 def get_time_duration(duration: str) -> int:
+    HOUR = 60 * 60
+    DAY = 24 * HOUR
     durationMap = {
-        'hour': 60 * 60,
-        'day': 24 * 60 * 60,
-        'week': 7 * 24 * 60 * 60,
-        'month': 30 * 24 * 60 * 60,
-        'year': 365 * 24 * 60 * 60,
+        'hour': HOUR,
+        'day': DAY,
+        'week': 7 * DAY,
+        'month': 30 * DAY,
+        'year': 365 * DAY,
         'alltime': int(time())
     }
     return durationMap[duration] if duration in durationMap else 0
@@ -44,7 +46,6 @@ def get_mentions():
     limit = request.args.get('limit', 25)
     duration = request.args.get('duration', 'week')
     time_dur = get_time_duration(duration)
-
     db = NbaDB()
     mentions = db.get_mentions(limit, time_dur, mention_type)
     db.close()
