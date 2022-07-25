@@ -18,6 +18,27 @@ class NbaDB:
         self.cur.execute('INSERT INTO images (name, img_url) VALUES (%s, %s);', [name, img_url])
         self.conn.commit()
 
+    def get_image(self, name: str) -> str:
+        self.cur.execute('SELECT img_url FROM images WHERE name = %s;', [name])
+        return self.cur.fetchone()[0]
+
+    def get_comments(self, page: int, time_dur: int, name: str):
+        self.cur.execute(
+            '''
+            SELECT comment, timestamp, mention_type, comment_id FROM mentions
+            WHERE name = %s AND (timestamp > (EXTRACT(epoch FROM NOW()) - %s))
+            ORDER BY timestamp DESC
+            LIMIT 10 OFFSET %s;
+            ''',
+            [name, time_dur, max(0, page-1)*10]
+        )
+        return [{
+            'comment': row[0],
+            'timestamp': int(row[1]),
+            'mention_type': row[2],
+            'comment_id': row[3]
+        } for row in self.cur]
+
     def get_mentions(self, limit: int, time_dur: int, mention_type: str):
         self.cur.execute(
             '''
@@ -35,7 +56,8 @@ class NbaDB:
         return [{
             'name': row[0].title(),
             'mentions': row[1],
-            'img_url': row[2]
+            'img_url': row[2],
+            'url_name': row[0].lower().replace(' ', '-')
         } for row in self.cur]
 
     def add_mention(self, name: str, comment_id: str, comment: str, mention: str, mention_type: str):

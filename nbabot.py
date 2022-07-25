@@ -20,6 +20,8 @@ def main():
     print('listening for comments in r/nba')
     db = NbaDB()
     for comment in reddit.subreddit('nba').stream.comments():
+        if comment.author and comment.author.name == 'AutoModerator':
+            continue
         for player, names in player_names.items():
             for name in names:
                 if name in comment.body.lower():
