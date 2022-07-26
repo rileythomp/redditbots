@@ -1,32 +1,32 @@
 team_names = {
-    'atlanta hawks': ['atlanta', 'hawks', " atl "],
-    'boston celtics': ['boston', 'celtics', ' bos ', ' celts '],
+    'atlanta hawks': ['atlanta', 'hawks', ' atl '],
+    'boston celtics': ['boston', 'celtics', ' celts ', ' bos '],
     'brooklyn nets': ['brooklyn', 'nets', ' bkn '],
     'charlotte hornets': ['charlotte', 'hornets', ' cha '],
     'chicago bulls': ['chicago', 'bulls', ' chi '],
-    'cleveland cavaliers': ['cleveland', 'cavaliers', ' cle ', ' cavs '],
-    'dallas mavericks': ['dallas', 'mavericks', ' dal ', ' mavs '],
-    'denver nuggets': ['denver', 'nuggets', ' den ', ' nugs ', ' nuggs '],
+    'cleveland cavaliers': ['cleveland', 'cavaliers', ' cavs ', ' cle '],
+    'dallas mavericks': ['dallas', 'mavericks', ' mavs ', ' dal '],
+    'denver nuggets': ['denver', 'nuggets', ' nugs ', ' nuggs ', ' den '],
     'detroit pistons': ['detroit', 'pistons', ' det '],
     'golden state warriors': ['golden state', 'warriors', ' gsw '],
     'houston rockets': ['houston', 'rockets', ' hou '],
     'indiana pacers': ['indiana', 'pacers', ' ind '],
-    'los angeles clippers': ['los angeles', 'clippers', ' lac ', ' clips '],
+    'los angeles clippers': ['los angeles', 'clippers', ' clips ', ' lac '],
     'los angeles lakers': ['los angeles', 'lakers', ' lal '],
-    'memphis grizzlies': ['memphis', 'grizzlies', ' mem ', ' grizz '],
+    'memphis grizzlies': ['memphis', 'grizzlies', ' grizz ', ' mem '],
     'miami heat': ['miami', 'heat', ' mia '],
     'milwaukee bucks': ['milwaukee', 'bucks', ' mil '],
     'minnesota timberwolves': ['minnesota', 'timberwolves', 'twolves', 'wolves', ' minn '],
-    'new orleans pelicans': ['new orleans', 'pelicans', ' nop ', ' pels' ],
+    'new orleans pelicans': ['new orleans', 'pelicans', ' pels ', ' nop ' ],
     'new york knicks': ['new york', 'knicks', ' nyk '],
     'oklahoma city thunder': ['oklahoma city', 'thunder', ' okc '],
     'orlando magic': ['orlando', 'magic', ' orl '],
     'philadelphia 76ers': ['philadelphia', '76ers', ' phi '],
     'phoenix suns': ['phoenix', 'suns', ' phx '],
-    'portland trailblazers': ['portland', 'trail blazers', ' por ', 'blazers'],
+    'portland trailblazers': ['portland', 'trail blazers', 'blazers', ' por '],
     'sacramento kings': ['sacramento', 'kings', ' sac '],
     'san antonio spurs': ['san antonio', 'spurs', ' sas '],
-    'toronto raptors': ['toronto', 'raptors', ' tor ', ' raps '],
+    'toronto raptors': ['toronto', 'raptors', ' raps ', ' tor '],
     'utah jazz': ['utah', 'jazz', ' uta '],
     'washington wizards': ['washington', 'wizards', ' wiz ']
 }
@@ -655,7 +655,7 @@ if __name__ == '__main__':
     from db import NbaDB
     import requests
     from bs4 import BeautifulSoup
-    import unidecode
+    from unidecode import unidecode
     BBALL_REF_URL = 'https://www.basketball-reference.com'
     adds = 0
     db = NbaDB()
@@ -666,7 +666,7 @@ if __name__ == '__main__':
         results = soup.find(id='players')
         players = results.find_all('tr')
         for player in players[1:]:
-            player_name = unidecode.unidecode(player.find(attrs={'data-stat':'player'}).text.lower())
+            player_name = unidecode(player.find(attrs={'data-stat':'player'}).text.lower())
             year_max = player.find(attrs={'data-stat':'year_max'}).text
             if player_name in player_names and (2020 <= int(year_max) and int(year_max) <= 2022):
                 player_url = player.find(attrs={'data-stat':'player'}).find('a')['href']
@@ -675,11 +675,15 @@ if __name__ == '__main__':
                 player_info = player_soup.find(id='info')
                 player_imgs = player_info.find_all('img')
                 player_img = player_imgs[0]['src'] if len(player_imgs) > 0 else ''
-                print(player_name)
-                db.add_image(player_name, player_img)
-                adds += 1
-                print(f'Added {adds} of {len(player_names)} players')
+                print(f'{player_name}: {player_img}')
             elif player_name in player_names:
                 print(f'{player_name} is skipped')
-    print(f'Done: Added {adds} of {len(player_names)} players')
+
+    for team_name in team_names:
+        team = team_names[team_name][-1].replace(' ', '').upper()
+        if team == 'WIZ':
+            team = 'WAS'
+        elif team == 'MINN':
+            team = 'MIN'
+        print(f'{team_name}: {team}')
     
