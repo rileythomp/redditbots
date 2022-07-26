@@ -30,6 +30,7 @@ def main():
                     if not mentioned:
                         db.add_comment(c.id, c.body, c.author.name, f'{REDDIT_URL}{c.permalink}', c.created_utc)
                     db.add_mention(player, c.id, c.body, name, 'player')
+                    print(f'{c.author.name} mentioned {player} as {name}')
                     mentioned = True
                     break
         for team, names in team_names.items():
@@ -38,6 +39,7 @@ def main():
                     if not mentioned:
                         db.add_comment(c.id, c.body, c.author.name, f'{REDDIT_URL}{c.permalink}', c.created_utc)
                     db.add_mention(team, c.id, c.body, name, 'team')
+                    print(f'{c.author.name} mentioned {team} as {name}')
                     mentioned = True
                     break
         

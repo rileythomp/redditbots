@@ -98,7 +98,7 @@ player_names = {
     "tony bradley": ["tony bradley"],
     "ignas brazdeikis": ["ignas brazdeikis", "brazdeikis", "ignas"],
     "mikal bridges": ["mikal bridges", "mikal"],
-    "miles bridges": ["miles bridges", "bridges"],
+    "miles bridges": ["miles bridges"],
     "oshae brissett": ["oshae brissett", "brissett"],
     "malcolm brogdon": ["malcolm brogdon", "brogdon"],
     "armoni brooks": ["armoni brooks", "armoni"],

@@ -1,7 +1,7 @@
-from time import time
 from psycopg2 import connect
 from psycopg2.errors import UniqueViolation, InFailedSqlTransaction
 from os import getenv
+from string import capwords
 
 DATABASE_URL = getenv('DATABASE_URL', 'postgres://postgres:postgres@localhost:5432/redditbot')
 
@@ -62,26 +62,42 @@ class NbaDB:
         self.conn.commit()
 
     def get_mentions(self, limit: int, time_dur: int, mention_type: str):
+        HOUR = 60*60
+        if time_dur == HOUR:
+            next_dur = 24
+        elif time_dur == HOUR*24:
+            next_dur = 7
+        elif time_dur == HOUR*24*7:
+            next_dur = 4
+        elif time_dur == HOUR*24*30:
+            next_dur = 12
+        elif time_dur == HOUR*24*365:
+            next_dur = 1
+        else:
+            return []
+
         self.cur.execute(
             '''
-            SELECT m.name, COUNT(*) AS mentions, imgs.img_url
+            SELECT m.name, imgs.img_url,
+            COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW())-%(time_dur)s AND EXTRACT(epoch FROM NOW())) AS mentions,
+            (COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW())-(%(time_dur)s*%(next_dur)s) AND EXTRACT(epoch FROM NOW())))/%(next_dur)s AS duravg
             FROM mentions AS m
             LEFT JOIN images AS imgs
             ON m.name = imgs.name
             LEFT JOIN nba_comments AS nc
-            ON nc.comment_id = m.comment_id
-            WHERE (nc.timestamp > (EXTRACT(epoch FROM NOW()) - %s))
-            AND m.mention_type = %s
+            ON m.comment_id = nc.comment_id
+            WHERE m.mention_type = %(mention_type)s
             GROUP BY m.name, imgs.img_url
-            ORDER BY mentions DESC LIMIT %s;
+            ORDER BY mentions DESC LIMIT %(limit)s;
             ''',
-            [time_dur, mention_type, limit]
+            {'time_dur': time_dur, 'next_dur': next_dur, 'mention_type': mention_type, 'limit': limit}
         )
         return [{
-            'name': row[0].title(),
-            'mentions': row[1],
-            'img_url': row[2],
-            'url_name': row[0].lower().replace(' ', '-')
+            'name': capwords(row[0]),
+            'url_name': row[0].lower().replace(' ', '-'),
+            'img_url': row[1],
+            'mentions': row[2],
+            'is_trending': int(row[2]) > 10 and int(row[2]) > 2*int(row[3]),
         } for row in self.cur]
 
     def add_mention(self, name: str, comment_id: str, comment: str, mention: str, mention_type: str):
