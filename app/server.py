@@ -28,6 +28,15 @@ def get_time_duration(duration: str) -> int:
     }
     return durationMap[duration] if duration in durationMap else 0
 
+@app.route('/api/v1/search', methods=['GET'])
+def search_name():
+    search = request.args.get('search', '').strip()[:25].lower()
+    limit = max(min(int(request.args.get('limit', 10))//2, 10), 0)
+    db = NbaDB()
+    names = db.search_name(search, limit)
+    db.close()
+    return make_response(jp.encode(names), 200)
+
 @app.route('/api/v1/mentions/comments', methods=['GET'])
 def get_comments():
     name = request.args.get('name').replace('-', ' ')

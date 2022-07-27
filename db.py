@@ -22,6 +22,46 @@ class NbaDB:
         self.cur.execute('INSERT INTO images (name, img_url) VALUES (%s, %s);', [name, img_url])
         self.conn.commit()
 
+    def search_name(self, search: str, limit: int):
+        res = []
+        self.cur.execute(
+            '''
+            SELECT i.name, COUNT(*) AS mentions
+            FROM images AS i
+            LEFT JOIN mentions AS m
+            ON i.name = m.name
+            WHERE i.name ILIKE  CONCAT(%s, '%%')
+            GROUP BY i.name
+            ORDER BY mentions DESC
+            LIMIT %s;
+            ''',
+            [search, limit]
+        )
+        for row in self.cur: res.append({
+            'name': capwords(row[0]),
+            'url_name': row[0].lower().replace(' ', '-'),
+        })
+        self.cur.execute(
+            '''
+            SELECT i.name, COUNT(*) AS mentions
+            FROM images AS i
+            LEFT JOIN mentions AS m
+            ON i.name = m.name
+            WHERE i.name ILIKE  CONCAT('%%', %s, '%%')
+            AND i.name NOT ILIKE  CONCAT(%s, '%%')
+            GROUP BY i.name
+            ORDER BY mentions DESC
+            LIMIT %s;
+            ''',
+            [search, search, limit]
+        )
+        for row in self.cur: res.append({
+            'name': capwords(row[0]),
+            'url_name': row[0].lower().replace(' ', '-'),
+        })
+        return res
+
+
     def get_comments(self, page: int, time_dur: int, name: str):
         self.cur.execute(
             '''
