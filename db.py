@@ -102,42 +102,31 @@ class NbaDB:
         self.conn.commit()
 
     def get_mentions(self, limit: int, time_dur: int, mention_type: str):
-        HOUR = 60*60
-        if time_dur == HOUR:
-            next_dur = 24
-        elif time_dur == HOUR*24:
-            next_dur = 7
-        elif time_dur == HOUR*24*7:
-            next_dur = 4
-        elif time_dur == HOUR*24*30:
-            next_dur = 12
-        elif time_dur == HOUR*24*365:
-            next_dur = 1
-        else:
-            return []
-
+        # 8 hours = 28800s
+        # 32 hours = 115200s
         self.cur.execute(
             '''
             SELECT m.name, imgs.img_url,
-            COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW())-%(time_dur)s AND EXTRACT(epoch FROM NOW())) AS mentions,
-            (COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW())-(%(time_dur)s*%(next_dur)s) AND EXTRACT(epoch FROM NOW())))/%(next_dur)s AS duravg
+            COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW())-%s AND EXTRACT(epoch FROM NOW())) AS mentions,
+            COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW())-28800 AND EXTRACT(epoch FROM NOW())) AS recent_mentions,
+            COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW())-115200 AND EXTRACT(epoch FROM NOW())) AS longer_mentions
             FROM mentions AS m
             LEFT JOIN images AS imgs
             ON m.name = imgs.name
             LEFT JOIN nba_comments AS nc
             ON m.comment_id = nc.comment_id
-            WHERE m.mention_type = %(mention_type)s
+            WHERE m.mention_type = %s
             GROUP BY m.name, imgs.img_url
-            ORDER BY mentions DESC LIMIT %(limit)s;
+            ORDER BY mentions DESC LIMIT %s;
             ''',
-            {'time_dur': time_dur, 'next_dur': next_dur, 'mention_type': mention_type, 'limit': limit}
+            [time_dur, mention_type, limit]
         )
         return [{
             'name': capwords(row[0]),
             'url_name': row[0].lower().replace(' ', '-'),
             'img_url': row[1],
             'mentions': row[2],
-            'is_trending': int(row[2]) > 10 and int(row[2]) > 2*int(row[3]),
+            'is_trending': int(row[3]) > 10 and int(row[3]) > 2*(int(row[4])/4),
         } for row in self.cur]
 
     def add_mention(self, name: str, comment_id: str, comment: str, mention: str, mention_type: str):
