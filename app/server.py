@@ -24,7 +24,8 @@ def get_time_duration(duration: str) -> int:
         'day': DAY,
         'week': 7 * DAY,
         'month': 30 * DAY,
-        'year': 365 * DAY
+        'year': 365 * DAY,
+        'alltime': int(time())
     }
     return durationMap[duration] if duration in durationMap else 0
 
