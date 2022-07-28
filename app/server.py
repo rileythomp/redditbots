@@ -34,10 +34,12 @@ def get_time_duration(duration: str) -> int:
     }
     return durationMap[duration] if duration in durationMap else 0
 
-def upsert_visitor(ip_addr):
+@app.route('/api/v1/visit', methods=['POST'])
+def upsert_visitor():
     db = NbaDB()
-    db.upsert_visitor(ip_addr)
+    db.upsert_visitor(request.remote_addr)
     db.close()
+    return 'OK'
 
 @app.route('/api/v1/search', methods=['GET'])
 def search_name():
@@ -61,7 +63,6 @@ def get_comments():
 
 @app.route('/api/v1/mentions', methods=['GET'])
 def get_mentions():
-    upsert_visitor(request.remote_addr)
     mention_type = request.args.get('mention_type', 'player')
     limit = request.args.get('limit', 25)
     duration = request.args.get('duration', 'week')
