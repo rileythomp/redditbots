@@ -3,14 +3,19 @@ from flask import Flask, request, make_response
 import jsonpickle as jp
 from db import NbaDB
 from os import getenv
-from praw import Reddit
 from time import time
 
-app = Flask(__name__)
-CORS(app)
+CLIENT_URL = getenv('CLIENT_URL', 'http://localhost:4200')
 
-# TODO: Validate HTTP Referer header on API endpoints
-# print(request.headers.get("Referer"))
+app = Flask(__name__)
+CORS(app, origins=CLIENT_URL)
+
+@app.before_request
+def before_request():
+    request_origin = request.headers.get("Origin")
+    if request_origin != CLIENT_URL:
+        print(f'Invalid request origin: {request_origin}')
+        return make_response('Invalid request origin', 401)
 
 @app.route('/', methods=['GET'])
 def home():
@@ -28,6 +33,11 @@ def get_time_duration(duration: str) -> int:
         'alltime': int(time())
     }
     return durationMap[duration] if duration in durationMap else 0
+
+def upsert_visitor(ip_addr):
+    db = NbaDB()
+    db.upsert_visitor(ip_addr)
+    db.close()
 
 @app.route('/api/v1/search', methods=['GET'])
 def search_name():
@@ -51,6 +61,7 @@ def get_comments():
 
 @app.route('/api/v1/mentions', methods=['GET'])
 def get_mentions():
+    upsert_visitor(request.remote_addr)
     mention_type = request.args.get('mention_type', 'player')
     limit = request.args.get('limit', 25)
     duration = request.args.get('duration', 'week')

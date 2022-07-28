@@ -14,6 +14,10 @@ class NbaDB:
         self.cur.close()
         self.conn.close()
 
+    def upsert_visitor(self, ip_addr: str):
+        self.cur.execute('INSERT INTO ip_addrs (ip_addr) VALUES (%s) ON CONFLICT (ip_addr) DO NOTHING;', [ip_addr])
+        self.conn.commit()
+
     def get_image(self, name: str) -> str:
         self.cur.execute('SELECT img_url FROM images WHERE name = %s;', [name])
         return self.cur.fetchone()[0]

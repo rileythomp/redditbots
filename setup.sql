@@ -32,3 +32,7 @@ CREATE TABLE IF NOT EXISTS nba_comments (
 	link VARCHAR,
 	timestamp INTEGER
 );
+
+CREATE TABLE IF NOT EXISTS ip_addrs (
+	ip_addr VARCHAR PRIMARY KEY
+);
