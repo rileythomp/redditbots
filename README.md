@@ -29,3 +29,15 @@ A collection of reddit bots.
 * Hosted on **Heroku**.
 * Uses **PostgreSQL** for storing `r/nba` comments
 * Uses **Twilio** for sending texts
+
+---
+
+To run the backend:
+* Must set required environment variables (see `env.sh`).
+* Must have a PostgreSQL database with the schema in `setup.sql`.
+* Must have Python 3 installed (currently using 3.10.5).
+```
+$ source env.sh
+$ pip install -r requirements.txt
+$ python main.py
+```
