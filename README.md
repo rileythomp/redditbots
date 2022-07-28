@@ -14,8 +14,6 @@ A collection of reddit bots.
 
 ### TODO
 
-* Validate HTTP Referer header on API endpoints
-
 * Look into aspect-based sentiment analysis to determine player sentiment in `r/nba`.
 
     ```
