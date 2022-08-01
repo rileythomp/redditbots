@@ -19,23 +19,23 @@ class NbaDB:
         self.conn.commit()
 
     def get_image(self, name: str) -> str:
-        self.cur.execute('SELECT img_url FROM images WHERE name = %s;', [name])
+        self.cur.execute('SELECT img_url FROM names WHERE name = %s;', [name])
         return self.cur.fetchone()[0]
 
     def add_image(self, name: str, img_url: str):
-        self.cur.execute('INSERT INTO images (name, img_url) VALUES (%s, %s);', [name, img_url])
+        self.cur.execute('INSERT INTO names (name, img_url) VALUES (%s, %s);', [name, img_url])
         self.conn.commit()
 
     def search_name(self, search: str, limit: int):
         res = []
         self.cur.execute(
             '''
-            SELECT i.name, COUNT(*) AS mentions
-            FROM images AS i
+            SELECT n.name, COUNT(*) AS mentions
+            FROM names AS n
             LEFT JOIN mentions AS m
-            ON i.name = m.name
-            WHERE i.name ILIKE  CONCAT(%s, '%%')
-            GROUP BY i.name
+            ON n.name = m.name
+            WHERE n.name ILIKE  CONCAT(%s, '%%')
+            GROUP BY n.name
             ORDER BY mentions DESC
             LIMIT %s;
             ''',
@@ -47,13 +47,13 @@ class NbaDB:
         })
         self.cur.execute(
             '''
-            SELECT i.name, COUNT(*) AS mentions
-            FROM images AS i
+            SELECT n.name, COUNT(*) AS mentions
+            FROM names AS n
             LEFT JOIN mentions AS m
-            ON i.name = m.name
-            WHERE i.name ILIKE  CONCAT('%%', %s, '%%')
-            AND i.name NOT ILIKE  CONCAT(%s, '%%')
-            GROUP BY i.name
+            ON n.name = m.name
+            WHERE n.name ILIKE  CONCAT('%%', %s, '%%')
+            AND n.name NOT ILIKE  CONCAT(%s, '%%')
+            GROUP BY n.name
             ORDER BY mentions DESC
             LIMIT %s;
             ''',
@@ -110,17 +110,17 @@ class NbaDB:
         # 32 hours = 115200s
         self.cur.execute(
             '''
-            SELECT m.name, imgs.img_url,
+            SELECT m.name, n.img_url,
             COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW())-%s AND EXTRACT(epoch FROM NOW())) AS mentions,
             COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW())-28800 AND EXTRACT(epoch FROM NOW())) AS recent_mentions,
             COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW())-115200 AND EXTRACT(epoch FROM NOW())) AS longer_mentions
             FROM mentions AS m
-            LEFT JOIN images AS imgs
-            ON m.name = imgs.name
+            LEFT JOIN names AS n
+            ON m.name = n.name
             LEFT JOIN nba_comments AS nc
             ON m.comment_id = nc.comment_id
             WHERE m.mention_type = %s
-            GROUP BY m.name, imgs.img_url
+            GROUP BY m.name, n.img_url
             ORDER BY mentions DESC LIMIT %s;
             ''',
             [time_dur, mention_type, limit]
