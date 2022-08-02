@@ -282,7 +282,7 @@ player_names = {
     "rodney hood": ["rodney hood"],
     "scotty hopson": ["scotty hopson", "hopson"],
     "al horford": ["al horford", "horford"],
-    "talen horton tucker": ["talen horton-tucker", "horton-tucker", "talen horton tucker", "horton tucker"],
+    "talen horton tucker": ["talen horton-tucker", "horton-tucker", "talen horton tucker", "horton tucker", "tht"],
     "danuel house jr.": ["danuel house jr", "danuel house"],
     "dwight howard": ["dwight howard", "howard"],
     "markus howard": ["markus howard"],
