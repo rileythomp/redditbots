@@ -220,20 +220,20 @@ class DB:
     def ack_comment(self, comment):
         try:
             self.cur.execute('INSERT INTO comments (comment_id) VALUES (%s);', [comment.id])
-            self.conn.commit()
         except Exception as e:
             print(f'Error acking comment: {e}')
+        self.conn.commit()
 
     def ack_se_comment(self, comment):
         try:
             self.cur.execute('INSERT INTO se_comments (comment_id) VALUES (%s);', [comment.id])
-            self.conn.commit()
         except Exception as e:
             print(f'Error acking software engineer comment: {e}')
+        self.conn.commit()
 
     def ack_se_post(self, post):
         try:
             self.cur.execute('INSERT INTO se_posts (post_id) VALUES (%s);', [post.id])
-            self.conn.commit()
         except Exception as e:
             print(f'Error acking post: {e}')
+        self.conn.commit()
