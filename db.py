@@ -23,9 +23,9 @@ class NbaDB:
     def upsert_visitor(self, ip_addr: str):
         try:
             self.cur.execute('INSERT INTO ip_addrs (ip_addr) VALUES (%s) ON CONFLICT (ip_addr) DO NOTHING;', [ip_addr])
-            self.conn.commit()
         except Exception as e:
             print(f'Error upserting visitor: {e}')
+        self.conn.commit()
 
     def get_image(self, name: str) -> str:
         try:
@@ -38,9 +38,9 @@ class NbaDB:
     def add_image(self, name: str, img_url: str):
         try:
             self.cur.execute('INSERT INTO names (name, img_url) VALUES (%s, %s);', [name, img_url])
-            self.conn.commit()
         except Exception as e:
             print(f'Error adding image: {e}')
+        self.conn.commit()
 
     def search_name(self, search: str, limit: int):
         res = []
@@ -118,13 +118,13 @@ class NbaDB:
                 'INSERT INTO nba_comments (comment_id, comment, author, link, timestamp) VALUES (%s, %s, %s, %s, %s);',
                 [comment_id, comment, author, link, timestamp]
             )
-            self.conn.commit()
         except UniqueViolation as e:
             print(f'unique violation: {e}')
         except InFailedSqlTransaction as e:
             print(f'in failed sql transaction: {e}')
         except Exception as e:
             print(f'exception: {e}')
+        self.conn.commit()
 
     def get_mentions(self, limit: int, time_dur: int, mention_type: str):
         # 8 hours = 28800s
@@ -164,13 +164,13 @@ class NbaDB:
                 'INSERT INTO mentions (name, comment_id, mention, mention_type) VALUES (%s, %s, %s, %s);',
                 [name, comment_id, mention, mention_type]
             )
-            self.conn.commit()
         except UniqueViolation as e:
             print(f'unique violation: {e}')
         except InFailedSqlTransaction as e:
             print(f'in failed sql transaction: {e}')
         except Exception as e:
             print(f'exception: {e}')
+        self.conn.commit()
 
 class DB:
     def __init__(self):
