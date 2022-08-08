@@ -29,7 +29,7 @@ def main():
                 if name in c.body.lower():
                     if not mentioned:
                         db.add_comment(c.id, c.body, c.author.name, f'{REDDIT_URL}{c.permalink}', c.created_utc)
-                    db.add_mention(player, c.id, c.body, name, 'player')
+                    db.add_mention(player, c.id, name, 'player')
                     print(f'{c.author.name} mentioned {player} as {name}')
                     mentioned = True
                     break
@@ -38,7 +38,7 @@ def main():
                 if name in c.body.lower():
                     if not mentioned:
                         db.add_comment(c.id, c.body, c.author.name, f'{REDDIT_URL}{c.permalink}', c.created_utc)
-                    db.add_mention(team, c.id, c.body, name, 'team')
+                    db.add_mention(team, c.id, name, 'team')
                     print(f'{c.author.name} mentioned {team} as {name}')
                     mentioned = True
                     break
