@@ -73,6 +73,26 @@ def get_mentions():
 
     return make_response(jp.encode(mentions), 200)
 
+@app.route('/api/v1/mentions/stats', methods=['GET'])
+def get_mentions_stats():
+    name = request.args.get('name').replace('-', ' ')
+    db = NbaDB()
+    most_mentioned_as = db.get_most_mentioned_as(name)
+    biggest_fan, biggest_fan_mentions = db.get_biggest_fan(name)
+    hour, day, week, month, year = db.get_mentions_in_time_frames(name)
+    db.close()
+    stats = {
+        'mostMentionedAs': most_mentioned_as,
+        'biggestFan': biggest_fan,
+        'biggestFanMentions': biggest_fan_mentions,
+        'hourMentions': hour,
+        'dayMentions':  day,
+        'weekMentions': week,
+        'monthMentions': month,   
+        'yearMentions': year,
+    }
+    return make_response(jp.encode(stats), 200)
+
 @app.route('/api/v1/image', methods=['GET'])
 def get_image():
     name = request.args.get('name').replace('-', ' ')
