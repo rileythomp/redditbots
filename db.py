@@ -60,7 +60,7 @@ class NbaDB:
             )
             for row in self.cur: res.append({
                 'name': capwords(row[0]),
-                'url_name': row[0].lower().replace(' ', '-'),
+                'urlName': row[0].lower().replace(' ', '-'),
             })
             self.cur.execute(
                 '''
@@ -78,7 +78,7 @@ class NbaDB:
             )
             for row in self.cur: res.append({
                 'name': capwords(row[0]),
-                'url_name': row[0].lower().replace(' ', '-'),
+                'urlName': row[0].lower().replace(' ', '-'),
             })
         except Exception as e:
             print(f'Error searching name: {e}')
@@ -222,14 +222,40 @@ class NbaDB:
             )
             return [{
                 'name': capwords(row[0]),
-                'url_name': row[0].lower().replace(' ', '-'),
-                'img_url': row[1],
-                'mentions': row[2],
-                'is_trending': int(row[3]) > 10 and int(row[3]) > 1.5*(int(row[4])/4),
+                'urlName': row[0].lower().replace(' ', '-'),
+                'imgUrl': row[1],
+                'numPosts': row[2],
+                'aboveAvg': int(row[3]) > 10 and int(row[3]) > 1.5*(int(row[4])/4),
             } for row in self.cur]
         except Exception as e:
             print(f'Error getting mentions: {e}')
             return []
+
+    def get_top_posters(self, limit: int, time_dur: int):
+        # 8 hours = 28800s
+        # 32 hours = 115200s
+        try:
+            self.cur.execute(
+                '''
+                SELECT author,
+                COUNT(*) FILTER (WHERE timestamp BETWEEN EXTRACT(epoch FROM NOW())-%s AND EXTRACT(epoch FROM NOW())) AS mentions,
+                COUNT(*) FILTER (WHERE timestamp BETWEEN EXTRACT(epoch FROM NOW())-28800 AND EXTRACT(epoch FROM NOW())) AS recent_mentions,
+                COUNT(*) FILTER (WHERE timestamp BETWEEN EXTRACT(epoch FROM NOW())-115200 AND EXTRACT(epoch FROM NOW())) AS longer_mentions
+                FROM nba_comments 
+                GROUP BY author
+                ORDER BY mentions DESC LIMIT %s;
+                ''',
+                [time_dur, limit]
+            )
+            return [{
+                'name': capwords(row[0]),
+                'numPosts': row[1],
+                'aboveAvg': int(row[2]) > 10 and int(row[2]) > 1.5*(int(row[3])/4),
+            } for row in self.cur]
+        except Exception as e:
+            print(f'Error getting top posters: {e}')
+            return []
+
 
     def add_mention(self, name: str, comment_id: str, mention: str, mention_type: str):
         try:

@@ -68,7 +68,10 @@ def get_mentions():
     duration = request.args.get('duration', 'week')
     time_dur = get_time_duration(duration)
     db = NbaDB()
-    mentions = db.get_mentions(limit, time_dur, mention_type)
+    if mention_type == "poster":
+        mentions = db.get_top_posters(limit, time_dur)
+    else:
+        mentions = db.get_mentions(limit, time_dur, mention_type)
     db.close()
 
     return make_response(jp.encode(mentions), 200)
