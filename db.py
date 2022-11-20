@@ -270,29 +270,53 @@ class NbaDB:
             print(f'exception: {e}')
         self.conn.commit()
 
-    def get_favourite_player(self, name: str):
+    def get_favourites(self, name: str):
         try:
             self.cur.execute(
                 '''
-                SELECT name, COUNT(*)
-                FROM mentions AS m
-                LEFT JOIN nba_comments AS nc
-                ON m.comment_id = nc.comment_id
-                WHERE nc.author = %s
-                GROUP BY name
-                ORDER BY COUNT(*) DESC
-                LIMIT 1;
+                (
+                    SELECT name, COUNT(*)
+                    FROM mentions AS m
+                    LEFT JOIN nba_comments AS nc
+                    ON m.comment_id = nc.comment_id
+                    WHERE nc.author = %s AND m.mention_type = 'player'
+                    GROUP BY name
+                    ORDER BY COUNT(*) DESC
+                    LIMIT 1
+                )
+                UNION
+                (
+                    SELECT name, COUNT(*)
+                    FROM mentions AS m
+                    LEFT JOIN nba_comments AS nc
+                    ON m.comment_id = nc.comment_id
+                    WHERE nc.author = %s AND m.mention_type = 'team'
+                    GROUP BY name
+                    ORDER BY COUNT(*) DESC
+                    LIMIT 1
+                );
                 ''',
-                [name]
+                [name, name]
             )
-            row = self.cur.fetchone()
-            if row is None or len(row) != 2:
-                print(f'Got invaild response fetching favourite player for {name}')
-                return '', 0
-            return row[0], row[1]
+            rows = 0
+            for row in self.cur:
+                if row is None or len(row) != 2:
+                    print(f'Got invaild response fetching favourite player for {name}')
+                    return '', 0, '', 0
+                if rows == 0:
+                    fav_player = row[0]
+                    fav_player_mentions = int(row[1])
+                    rows += 1
+                elif rows == 1:
+                    fav_team = row[0]
+                    fav_team_mentions = int(row[1])
+                else:
+                    print(f'Got invaild response fetching favourite player for {name}')
+                    return '', 0, '', 0
+            return fav_player, fav_player_mentions, fav_team, fav_team_mentions
         except Exception as e:
             print(f'Error getting favourite player of {name}: {e}')
-            return '', 0
+            return '', 0, '', 0
 
     def get_posts_in_time_frames(self, name: str):
         try:
@@ -317,6 +341,30 @@ class NbaDB:
         except Exception as e:
             print(f'Error getting posts in time frame for {name}: {e}')
             return 0, 0, 0, 0, 0
+
+    def get_redditor_posts(self, page: int, time_dur: int, name: str):
+        try:
+            self.cur.execute(
+                '''
+                SELECT comment, author, link, timestamp
+                FROM nba_comments AS nc
+                WHERE (timestamp > (EXTRACT(epoch FROM NOW()) - %s))
+                AND author = %s
+                ORDER BY timestamp DESC
+                LIMIT 10 OFFSET %s;
+                ''',
+                [time_dur, name, max(0, page-1)*10,]
+            )
+            return [{
+                'comment': row[0],
+                'author': row[1],
+                'link': row[2],
+                'timestamp': row[3],
+            } for row in self.cur]
+        except Exception as e:
+            print(f'Error getting redditor posts: {e}')
+            return []
+
 
 class DB:
     def __init__(self):
