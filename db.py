@@ -248,14 +248,13 @@ class NbaDB:
                 [time_dur, limit]
             )
             return [{
-                'name': capwords(row[0]),
+                'name': row[0],
                 'numPosts': row[1],
                 'aboveAvg': int(row[2]) > 10 and int(row[2]) > 1.5*(int(row[3])/4),
             } for row in self.cur]
         except Exception as e:
             print(f'Error getting top posters: {e}')
             return []
-
 
     def add_mention(self, name: str, comment_id: str, mention: str, mention_type: str):
         try:
@@ -270,6 +269,30 @@ class NbaDB:
         except Exception as e:
             print(f'exception: {e}')
         self.conn.commit()
+
+    def get_favourite_player(self, name: str):
+        try:
+            self.cur.execute(
+                '''
+                SELECT name, COUNT(*)
+                FROM mentions AS m
+                LEFT JOIN nba_comments AS nc
+                ON m.comment_id = nc.comment_id
+                WHERE nc.author = %s
+                GROUP BY name
+                ORDER BY COUNT(*) DESC
+                LIMIT 1;
+                ''',
+                [name]
+            )
+            row = self.cur.fetchone()
+            if row is None or len(row) != 2:
+                print(f'Got invaild response fetching favourite player for {name}')
+                return '', 0
+            return row[0], row[1]
+        except Exception as e:
+            print(f'Error getting favourite player of {name}: {e}')
+            return '', 0
 
 class DB:
     def __init__(self):

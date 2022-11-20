@@ -103,3 +103,24 @@ def get_image():
     img_url = db.get_image(name)
     db.close()
     return make_response(jp.encode(img_url), 200)
+
+@app.route('/api/v1/redditor/stats', methods=['GET'])
+def get_redditor_stats():
+    print(request.args)
+    name = request.args.get('name')
+    print(name)
+    db = NbaDB()
+    fav_player, fav_player_mentions = db.get_favourite_player(name)
+    print(fav_player, fav_player_mentions)
+    # hour, day, week, month, year = db.get_posts_in_time_frames(name)
+    db.close()
+    stats = {
+        'favPlayer': fav_player,
+        'favPlayerMentions': fav_player_mentions,
+        # 'hourPosts': hour,
+        # 'dayPosts':  day,
+        # 'weekPosts': week,
+        # 'monthPosts': month,
+        # 'yearPosts': year,
+    }
+    return make_response(jp.encode(stats), 200)
