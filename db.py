@@ -275,7 +275,7 @@ class NbaDB:
             self.cur.execute(
                 '''
                 (
-                    SELECT name, COUNT(*)
+                    SELECT name, COUNT(*), 1 as sort
                     FROM mentions AS m
                     LEFT JOIN nba_comments AS nc
                     ON m.comment_id = nc.comment_id
@@ -286,7 +286,7 @@ class NbaDB:
                 )
                 UNION
                 (
-                    SELECT name, COUNT(*)
+                    SELECT name, COUNT(*), 2 as sort
                     FROM mentions AS m
                     LEFT JOIN nba_comments AS nc
                     ON m.comment_id = nc.comment_id
@@ -294,7 +294,8 @@ class NbaDB:
                     GROUP BY name
                     ORDER BY COUNT(*) DESC
                     LIMIT 1
-                );
+                )
+                ORDER BY sort ASC;
                 ''',
                 [name, name]
             )
