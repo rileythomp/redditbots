@@ -294,6 +294,30 @@ class NbaDB:
             print(f'Error getting favourite player of {name}: {e}')
             return '', 0
 
+    def get_posts_in_time_frames(self, name: str):
+        try:
+            self.cur.execute(
+                '''
+                SELECT
+                COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW()) - 3600 AND EXTRACT(epoch FROM NOW())) AS hour_mentions,
+                COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW()) - 86400 AND EXTRACT(epoch FROM NOW())) AS day_mentions,
+                COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW()) - 604800 AND EXTRACT(epoch FROM NOW())) AS week_mentions,
+                COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW()) - 2592000 AND EXTRACT(epoch FROM NOW())) AS month_mentions,
+                COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW()) - 31536000 AND EXTRACT(epoch FROM NOW())) AS year_mentions
+                FROM nba_comments AS nc
+                WHERE author = %s;
+                ''',
+                [name]
+            )
+            row = self.cur.fetchone()
+            if row is None or len(row) != 5:
+                print(f'Got invaild response fetching posts in time frame for {name}')
+                return 0, 0, 0, 0, 0
+            return row[0], row[1], row[2], row[3], row[4]
+        except Exception as e:
+            print(f'Error getting posts in time frame for {name}: {e}')
+            return 0, 0, 0, 0, 0
+
 class DB:
     def __init__(self):
         try:
