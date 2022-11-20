@@ -301,7 +301,7 @@ class NbaDB:
             )
             rows = 0
             for row in self.cur:
-                if row is None or len(row) != 2:
+                if row is None or len(row) != 3:
                     print(f'Got invaild response fetching favourite player for {name}')
                     return '', 0, '', 0
                 if rows == 0:
