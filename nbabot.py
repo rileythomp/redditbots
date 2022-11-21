@@ -47,4 +47,9 @@ def main():
     print('done reading comments from r/nba')
 
 if __name__ == '__main__':
-    main()
+    while True:
+        try:
+            main()
+        except Exception as e:
+            print(f"nbabot: An exception occured while running: {e}")
+            continue
