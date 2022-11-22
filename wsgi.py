@@ -1,6 +1,9 @@
 from app.server import app
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    try:
+        app.run(port=5000, debug=True, use_reloader=False)
+    except Exception as e:
+        print(f'Error while running app: {e}')
 else:
     print(f'Running as {__name__}')

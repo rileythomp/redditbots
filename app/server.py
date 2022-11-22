@@ -3,12 +3,40 @@ from flask import Flask, request, make_response
 import jsonpickle as jp
 from db import NbaDB
 from os import getenv
-from time import time
+from time import time, sleep
+from threading import Thread
 
 CLIENT_URL = getenv('CLIENT_URL', 'http://localhost:4200')
 
 app = Flask(__name__)
 CORS(app, origins=CLIENT_URL)
+
+mentionsCache = {
+    'lastUpdated': 0,
+    'player': {'hour': [],'day': [], 'week': [], 'month': [], 'year': []},
+    'team': {'hour': [], 'day': [], 'week': [], 'month': [], 'year': []},
+    'poster': {'hour': [], 'day': [], 'week': [], 'month': [], 'year': []}
+}
+
+def updateMentions():
+    mention_types = ['player', 'team', 'poster']
+    durations = ['hour', 'day', 'week', 'month', 'year']
+    while True:
+        try:
+            db = NbaDB()
+            for mt in mention_types:
+                for d in durations:
+                    dur = get_time_duration(d)
+                    if mt == 'poster':
+                        mentionsCache[mt][d] = db.get_top_posters(30, dur)
+                    else:
+                        mentionsCache[mt][d] = db.get_mentions(30, dur, mt)
+            db.close()
+        except Exception as e:
+            print(f'Error while updating mentions: {e}')
+        sleep(60)
+
+Thread(target=updateMentions).start()
 
 @app.before_request
 def before_request():
@@ -67,6 +95,9 @@ def get_mentions():
     limit = request.args.get('limit', 25)
     duration = request.args.get('duration', 'week')
     time_dur = get_time_duration(duration)
+    cached = mentionsCache[mention_type][duration]
+    if len(cached) == int(limit):
+        return make_response(jp.encode(cached), 200)
     db = NbaDB()
     if mention_type == "poster":
         mentions = db.get_top_posters(limit, time_dur)
