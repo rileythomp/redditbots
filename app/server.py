@@ -6,6 +6,7 @@ from os import getenv
 from time import time, sleep
 from threading import Thread
 from string import capwords
+from nbalists import team_names
 
 CLIENT_URL = getenv('CLIENT_URL', 'http://localhost:4200')
 
@@ -122,13 +123,16 @@ def get_mentions_stats():
 
     # workaround: check cache for player, only fetch the missing time frames
     # hour, day, week, month, year = db.get_mentions_in_time_frames(name)
-    
+
+    type = 'player'
+    if name in team_names:
+        type = 'team'
     time_frames = {
-        'hour': find_player_mentions(mentionsCache['player']['hour'], capwords(name)),
-        'day': find_player_mentions(mentionsCache['player']['day'], capwords(name)),
-        'week': find_player_mentions(mentionsCache['player']['week'], capwords(name)),
-        'month': find_player_mentions(mentionsCache['player']['month'], capwords(name)),
-        'year': find_player_mentions(mentionsCache['player']['year'], capwords(name))
+        'hour': find_player_mentions(mentionsCache[type]['hour'], capwords(name)),
+        'day': find_player_mentions(mentionsCache[type]['day'], capwords(name)),
+        'week': find_player_mentions(mentionsCache[type]['week'], capwords(name)),
+        'month': find_player_mentions(mentionsCache[type]['month'], capwords(name)),
+        'year': find_player_mentions(mentionsCache[type]['year'], capwords(name))
     }
 
     missing_time_frames = []
@@ -136,7 +140,6 @@ def get_mentions_stats():
         if time_frames[tf] is None:
             missing_time_frames.append(tf)
     if len(missing_time_frames) > 0:
-        print(f'Missing time frames: {missing_time_frames}')
         missing_vals = db.get_mentions_in_chosen_time_frames(name, missing_time_frames)
         for i, mtf in enumerate(missing_time_frames):
             time_frames[mtf] = missing_vals[i]
