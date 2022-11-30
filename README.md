@@ -37,5 +37,5 @@ To run the backend:
 ```
 $ source env.sh
 $ pip install -r requirements.txt
-$ python main.py
+$ python wsgi.py
 ```

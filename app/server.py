@@ -5,6 +5,7 @@ from db import NbaDB
 from os import getenv
 from time import time, sleep
 from threading import Thread
+from string import capwords
 
 CLIENT_URL = getenv('CLIENT_URL', 'http://localhost:4200')
 
@@ -12,7 +13,6 @@ app = Flask(__name__)
 CORS(app, origins=CLIENT_URL)
 
 mentionsCache = {
-    'lastUpdated': 0,
     'player': {'hour': [],'day': [], 'week': [], 'month': [], 'year': []},
     'team': {'hour': [], 'day': [], 'week': [], 'month': [], 'year': []},
     'poster': {'hour': [], 'day': [], 'week': [], 'month': [], 'year': []}
@@ -107,23 +107,51 @@ def get_mentions():
 
     return make_response(jp.encode(mentions), 200)
 
+def find_player_mentions(players, name):
+    for i, player in enumerate(players):
+        if player['name'] == name:
+            return players[i]['numPosts']
+    return None
+
 @app.route('/api/v1/mentions/stats', methods=['GET'])
 def get_mentions_stats():
     name = request.args.get('name').replace('-', ' ')
     db = NbaDB()
     most_mentioned_as = db.get_most_mentioned_as(name)
     biggest_fan, biggest_fan_mentions = db.get_biggest_fan(name)
-    hour, day, week, month, year = db.get_mentions_in_time_frames(name)
+
+    # workaround: check cache for player, only fetch the missing time frames
+    # hour, day, week, month, year = db.get_mentions_in_time_frames(name)
+    
+    time_frames = {
+        'hour': find_player_mentions(mentionsCache['player']['hour'], capwords(name)),
+        'day': find_player_mentions(mentionsCache['player']['day'], capwords(name)),
+        'week': find_player_mentions(mentionsCache['player']['week'], capwords(name)),
+        'month': find_player_mentions(mentionsCache['player']['month'], capwords(name)),
+        'year': find_player_mentions(mentionsCache['player']['year'], capwords(name))
+    }
+
+    missing_time_frames = []
+    for tf in time_frames:
+        if time_frames[tf] is None:
+            missing_time_frames.append(tf)
+    if len(missing_time_frames) > 0:
+        print(f'Missing time frames: {missing_time_frames}')
+        missing_vals = db.get_mentions_in_chosen_time_frames(name, missing_time_frames)
+        for i, mtf in enumerate(missing_time_frames):
+            time_frames[mtf] = missing_vals[i]
+
     db.close()
+
     stats = {
         'mostMentionedAs': most_mentioned_as,
         'biggestFan': biggest_fan,
         'biggestFanMentions': biggest_fan_mentions,
-        'hourMentions': hour,
-        'dayMentions':  day,
-        'weekMentions': week,
-        'monthMentions': month,   
-        'yearMentions': year,
+        'hourMentions': time_frames['hour'],
+        'dayMentions':  time_frames['day'],
+        'weekMentions': time_frames['week'],
+        'monthMentions': time_frames['month'],  
+        'yearMentions': time_frames['year'],
     }
     return make_response(jp.encode(stats), 200)
 

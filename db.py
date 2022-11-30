@@ -133,6 +133,49 @@ class NbaDB:
             print(f'Error getting biggest fan for {name}: {e}')
             return '', 0
     
+    def get_mentions_in_chosen_time_frames(self, name: str, time_frames):
+        countQueries = {
+            'hour': '''
+                    COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW()) - 3600 AND EXTRACT(epoch FROM NOW())) AS hour_mentions,
+                    ''',
+            'day': '''
+                    COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW()) - 86400 AND EXTRACT(epoch FROM NOW())) AS day_mentions,
+                    ''',
+            'week': '''
+                    COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW()) - 604800 AND EXTRACT(epoch FROM NOW())) AS week_mentions,
+                    ''',
+            'month': '''
+                    COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW()) - 2592000 AND EXTRACT(epoch FROM NOW())) AS month_mentions,
+                    ''',
+            'year': '''
+                    COUNT(*) FILTER (WHERE nc.timestamp BETWEEN EXTRACT(epoch FROM NOW()) - 31536000 AND EXTRACT(epoch FROM NOW())) AS year_mentions,
+                    '''
+        }
+        query = '''
+                SELECT
+                '''
+        for tf in time_frames:
+            if tf in countQueries:
+                query += countQueries[tf]
+        if ',' not in query:
+            return []
+        query = ''.join(query.rsplit(',', 1))
+        query += '''
+                FROM mentions AS m
+                LEFT JOIN nba_comments AS nc
+                ON nc.comment_id = m.comment_id
+                WHERE name = %s;
+                '''
+        try:
+            self.cur.execute(query, [name])
+            row = self.cur.fetchone()
+            if row is None:
+                return []
+            return row
+        except Exception as e:
+            print(f'Error getting mentions in chosen time frames for {name}: {e}')
+            return []
+
     def get_mentions_in_time_frames(self, name: str):
         try:
             self.cur.execute(
