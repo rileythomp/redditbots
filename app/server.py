@@ -168,22 +168,42 @@ def get_image():
 
 @app.route('/api/v1/redditor/stats', methods=['GET'])
 def get_redditor_stats():
-    print(request.args)
     name = request.args.get('name')
     db = NbaDB()
     fav_player, fav_player_mentions, fav_team, fav_team_mentions = db.get_favourites(name)
-    hour, day, week, month, year = db.get_posts_in_time_frames(name)
+    
+    #workaround: check cache for user, only fetch the missing time frames
+    # hour, day, week, month, year = db.get_posts_in_time_frames(name)
+
+    time_frames = {
+        'hour': find_player_mentions(mentionsCache['poster']['hour'], name),
+        'day': find_player_mentions(mentionsCache['poster']['day'], name),
+        'week': find_player_mentions(mentionsCache['poster']['week'], name),
+        'month': find_player_mentions(mentionsCache['poster']['month'], name),
+        'year': find_player_mentions(mentionsCache['poster']['year'], name)
+    }
+
+    missing_time_frames = []
+    for tf in time_frames:
+        if time_frames[tf] is None:
+            missing_time_frames.append(tf)
+    if len(missing_time_frames) > 0:
+        missing_vals = db.get_posts_in_chosen_time_frames(name, missing_time_frames)
+        for i, mtf in enumerate(missing_time_frames):
+            time_frames[mtf] = missing_vals[i]
+
     db.close()
+
     stats = {
         'favPlayer': fav_player,
         'favPlayerMentions': fav_player_mentions,
         'favTeam': fav_team,
         'favTeamMentions': fav_team_mentions,
-        'hourPosts': hour,
-        'dayPosts':  day,
-        'weekPosts': week,
-        'monthPosts': month,
-        'yearPosts': year,
+        'hourPosts': time_frames['hour'],
+        'dayPosts':  time_frames['day'],
+        'weekPosts': time_frames['week'],
+        'monthPosts': time_frames['month'],
+        'yearPosts': time_frames['year'],
     }
     return make_response(jp.encode(stats), 200)
 
