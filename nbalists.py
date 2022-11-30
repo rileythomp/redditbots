@@ -586,7 +586,7 @@ player_names = {
     "obi toppin": ["obi toppin", "toppin ", "obi "],
     "juan toscano anderson": ["juan toscano-anderson", "toscano-anderson", "juan toscano anderson", "toscano anderson"],
     "karl anthony towns": ["karl-anthony towns", "karl anthony towns", "towns", " kat "],
-    "gary trent jr.": ["gary trent jr", "gary trent"],
+    "gary trent jr.": ["gary trent jr", "gary trent", "trent jr" "trent"],
     "p.j. tucker": ["p.j. tucker", "pj tucker", "tucker"],
     "rayjon tucker": ["rayjon tucker"],
     "myles turner": ["myles turner", "turner"],
