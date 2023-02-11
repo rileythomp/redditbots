@@ -81,12 +81,12 @@ def search_name():
 
 @app.route('/api/v1/mentions/comments', methods=['GET'])
 def get_comments():
-    name = request.args.get('name').replace('-', ' ')
+    name = request.args.get('name')
     page = int(request.args.get('page', 1))
     duration = request.args.get('duration', 'week')
     time_dur = get_time_duration(duration)
     db = NbaDB()
-    comments = db.get_comments(page, time_dur, name)
+    comments = db.get_comments_by_name(page, time_dur, name.replace('-', ' ')) if name else db.get_comments_stream(page, time_dur)
     db.close()
     return make_response(jp.encode(comments), 200)
 

@@ -203,7 +203,7 @@ class NbaDB:
             print(f'Error getting mentions in time frames for {name}: {e}')
             return 0, 0, 0, 0, 0
 
-    def get_comments(self, page: int, time_dur: int, name: str):
+    def get_comments_by_name(self, page: int, time_dur: int, name: str):
         try:
             self.cur.execute(
                 '''
@@ -224,6 +224,28 @@ class NbaDB:
                 'link': row[2],
                 'timestamp': row[3],
                 'mention_type': row[4]
+            } for row in self.cur]
+        except Exception as e:
+            print(f'Error getting comments: {e}')
+            return []
+    
+    def get_comments_stream(self, page: int, time_dur: int):
+        try:
+            self.cur.execute(
+                '''
+                SELECT nc.comment, nc.author, nc.link, nc.timestamp
+                FROM nba_comments AS nc
+                WHERE (nc.timestamp > (EXTRACT(epoch FROM NOW()) - %s))
+                ORDER BY nc.timestamp DESC
+                LIMIT 10 OFFSET %s;
+                ''',
+                [time_dur, max(0, page-1)*10]
+            )
+            return [{
+                'comment': row[0],
+                'author': row[1],
+                'link': row[2],
+                'timestamp': row[3],
             } for row in self.cur]
         except Exception as e:
             print(f'Error getting comments: {e}')

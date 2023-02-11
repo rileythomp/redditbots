@@ -2,7 +2,7 @@ from app.server import app
 
 if __name__ == '__main__':
     try:
-        app.run(port=5000, debug=True, use_reloader=False)
+        app.run(port=5000, debug=False, use_reloader=False)
     except Exception as e:
         print(f'Error while running app: {e}')
 else:
